@@ -1,0 +1,35 @@
+- name: Gather information about specific OpenStack port
+  openstack.cloud.port_info:
+    interface: public
+    name: "{{ port_id }}"
+  register: port_data
+- name: Print info about port
+  debug:
+    msg:
+      - "Allowed address pairs: {{ port_data.ports[0].allowed_address_pairs }}"
+      - "MAC address of port is {{ port_data.ports[0].mac_address }}"
+  when: debug_mode|ansible.builtin.default(False)|ansible.builtin.bool
+- name: Get current AAPs on OpenStack port
+  ansible.builtin.set_fact:
+    current_aaps: "{{ port_data.ports[0].allowed_address_pairs }}"
+- name: Create AAP dict step 1
+  set_fact:
+    additional_aaps: []
+- name: Create AAP dict step 2
+  set_fact:
+    additional_aaps: "{{ additional_aaps + [{ 'ip_address': item, 'mac_address': port_data.ports[0].mac_address }] }}"
+  loop: "{{ allowed_subnets|split(',') }}"
+- name: Join (union) two AAPs
+  ansible.builtin.set_fact:
+    combined_aaps: "{{ current_aaps|ansible.builtin.union(additional_aaps) }}"
+- name: Print info about port
+  debug:
+    msg:
+      - "Current allowed address pairs: {{ current_aaps }}"
+      - "Applied allowed address pairs: {{ combined_aaps }}"
+  when: debug_mode|ansible.builtin.default(False)|ansible.builtin.bool
+- name: Update the existing port with AAP
+  openstack.cloud.port:
+    name: "{{ port_id }}"
+    network: "{{ network_id }}"
+    allowed_address_pairs: "{{ combined_aaps }}"

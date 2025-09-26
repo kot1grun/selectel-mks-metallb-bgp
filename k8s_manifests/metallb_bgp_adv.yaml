@@ -1,0 +1,8 @@
+apiVersion: metallb.io/v1beta1
+kind: BGPAdvertisement
+metadata:
+  name: example-anycast-adv
+  namespace: metallb-system
+spec:
+  ipAddressPools:
+    - example-anycast-pool

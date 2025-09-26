@@ -1,0 +1,16 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name: cilium-echo-svc-metallb
+  annotations:
+    loadbalancer.openstack.org/class: non-existent # <- if you do not want to use Octavia LB
+    metallb.io/address-pool: example-anycast-pool # <- use your pool name here
+spec:
+  selector:
+    app: cilium-echoserver
+  type: LoadBalancer
+  ports:
+    - name: http
+      port: 80
+      targetPort: 8080
+      protocol: TCP

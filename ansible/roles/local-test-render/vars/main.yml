@@ -1,0 +1,17 @@
+my_hostname: lovely-router
+provider: OnPremCloud
+region: ru-1
+anycast_subnet: 203.0.113.64/29
+provider_asn: 65101
+my_asn: 64999
+my_ip_address: 198.51.100.14
+peer_ip_address: 198.51.100.9
+my_local_subnet: 10.199.1.0/24
+my_internal_iface: eth1
+my_external_iface: eth0
+trusted_ips:
+  - 198.18.1.2
+  - 198.19.5.9
+additional_trusted_ips:
+  - 198.19.252.0/22
+all_trusted_ips: "{{ trusted_ips+additional_trusted_ips }}"

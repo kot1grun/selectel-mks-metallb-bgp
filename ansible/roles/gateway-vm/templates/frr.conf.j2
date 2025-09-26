@@ -1,0 +1,34 @@
+frr defaults traditional
+hostname {{ my_hostname|lower }}
+log syslog informational
+!
+ip prefix-list default_from_{{ provider|lower }} seq 10 permit any
+ip prefix-list my_anycast_subnet seq 10 permit {{ anycast_subnet }} le 32
+ip prefix-list my_anycast_subnet seq 100 deny any
+!
+route-map prpnd_private permit 10
+ description For AS PATH prepend
+ set as-path prepend {{ my_asn }}
+exit
+!
+ip router-id {{ my_ip_address }}
+!
+router bgp {{ my_asn }}
+ neighbor mks-nodes peer-group
+ neighbor mks-nodes remote-as internal
+ neighbor mks-nodes update-source {{ my_internal_iface }}
+ neighbor {{ peer_ip_address }} remote-as {{ provider_asn }}
+ neighbor {{ peer_ip_address }} description {{ provider }}-{{ region }}-peer
+ neighbor {{ peer_ip_address }} interface eth0
+ neighbor {{ peer_ip_address }} ebgp-multihop
+ bgp listen limit 110
+ bgp listen range {{ my_local_subnet }} peer-group mks-nodes
+ !
+ address-family ipv4 unicast
+  network {{ anycast_subnet }}
+  neighbor {{ peer_ip_address }} prefix-list default_from_{{ provider|lower }} in
+  neighbor {{ peer_ip_address }} prefix-list my_anycast_subnet out
+  neighbor {{ peer_ip_address }} route-map prpnd_private out
+ exit-address-family
+exit
+!

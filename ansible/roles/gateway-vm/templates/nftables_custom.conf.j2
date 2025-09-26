@@ -1,0 +1,39 @@
+flush ruleset
+
+table inet filter {
+	set trusted_ips {
+		type ipv4_addr
+		flags interval
+		comment "Trusted IP addresses"
+		elements = { {{ all_trusted_ips|join(', ') }} }
+	}
+
+	chain input {
+		type filter hook input priority filter; policy drop;
+		ct state established,related counter accept
+		iifname "lo" counter accept
+		meta l4proto icmp counter accept
+		iifname "{{ my_internal_iface }}" counter accept
+		tcp dport 22 ct state new ip saddr @trusted_ips counter accept
+		iifname "{{ my_external_iface }}" tcp dport 179 counter accept
+	}
+
+	chain forward {
+		type filter hook forward priority filter; policy accept;
+	}
+
+	chain output {
+		type filter hook output priority filter; policy accept;
+	}
+}
+
+table ip nat {
+	chain postrouting {
+		type nat hook postrouting priority srcnat; policy accept;
+		ip saddr {{ my_local_subnet }} oifname "{{ my_external_iface }}" counter masquerade
+	}
+
+	chain prerouting {
+		type nat hook prerouting priority dstnat; policy accept;
+	}
+}

@@ -1,0 +1,13 @@
+- name: Render the FRR template and display output
+  ansible.builtin.debug:
+    msg: "{{ lookup('ansible.builtin.template', 'frr.conf.j2').split('\\n') }}"
+- name: Render FRR template and save config to a file
+  ansible.builtin.template:
+    backup: false
+    src: "frr.conf.j2"
+    dest: "../../../../configs/frr_test.conf"
+- name: Render nftables template and save config to a file
+  ansible.builtin.template:
+    backup: false
+    src: "nftables_custom.conf.j2"
+    dest: "../../../../configs/nftables_custom.conf"

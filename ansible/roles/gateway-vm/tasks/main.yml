@@ -1,0 +1,84 @@
+- name: Wait 180 seconds for target connection to become reachable/usable
+  ansible.builtin.wait_for_connection:
+    delay: 10
+    timeout: 180
+- name: Put SELinux in permissive mode, logging actions that would be blocked
+  ansible.posix.selinux:
+    policy: targeted
+    state: permissive
+- name: Ensure that common packages have latest version
+  ansible.builtin.package:
+    name: "{{ common_rpm_packages }}"
+    state: latest
+- name: Ensure that nftables package has latest version
+  ansible.builtin.package:
+    name: nftables
+    state: latest
+- name: Disable cloud-init for configuring network
+  lineinfile:
+    path: /etc/cloud/cloud.cfg.d/99_disable_network_config.cfg
+    line: "network: {config: disabled}"
+    state: present
+    create: yes
+    owner: root
+    group: root
+    mode: "0660"
+- name: Install the frr repository package for stable version
+  ansible.builtin.package:
+    name: "{{ frr_stable_rpm_repo_url }}"
+    disable_gpg_check: true
+    state: present
+- name: Set ip forwarding on in /proc and in the sysctl file and reload if necessary
+  ansible.posix.sysctl:
+    name: net.ipv4.ip_forward
+    value: "1"
+    sysctl_set: true
+    sysctl_file: /etc/sysctl.d/01-ip-forwarding.conf
+    state: present
+    reload: true
+- name: Ensure all packages have their latest versions
+  ansible.builtin.package:
+    name: "*"
+    state: latest
+- name: Install frrouting packages
+  ansible.builtin.package:
+    name:
+      - frr
+      - frr-pythontools
+    state: latest
+- name: Ensure desirable FRR daemon (for BGP) will be started
+  ansible.builtin.lineinfile:
+    path: /etc/frr/daemons
+    regexp: "^bgpd="
+    line: bgpd=yes
+- name: Ensure desirable FRR daemon (for BFD) will be started
+  ansible.builtin.lineinfile:
+    path: /etc/frr/daemons
+    regexp: "^bfdd="
+    line: bfdd=yes
+- name: Render FRR template and save config to a file
+  ansible.builtin.template:
+    backup: false
+    src: frr.conf.j2
+    dest: "/etc/frr/frr.conf"
+- name: Start and enable FRR service
+  ansible.builtin.service:
+    name: frr
+    state: restarted
+    enabled: true
+- name: Ensure desirable nftables ruleset will be applied
+  ansible.builtin.lineinfile:
+    path: /etc/sysconfig/nftables.conf
+    insertafter: '^#include "/etc/nftables/main.nft"'
+    line: 'include "/etc/nftables/local_custom.nft"'
+- name: Render nftables template and save config to a file
+  ansible.builtin.template:
+    backup: false
+    src: nftables_custom.conf.j2
+    dest: "/etc/nftables/local_custom.nft"
+    validate: /usr/sbin/nft -c -f %s
+- name: Start and enable nftables service
+  ansible.builtin.service:
+    name: nftables
+    state: restarted
+    enabled: true
