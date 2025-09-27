@@ -1,0 +1,14 @@
+availability_zone_alfa  = "ru-3b"
+availability_zone_bravo = "ru-7b"
+anycast_cidr            = "203.0.113.64/29"
+alfa_link_subnet        = "198.51.100.8/29"
+bravo_link_subnet       = "198.17.51.224/29"
+alfa_internal_subnet    = "192.168.150.0/24"
+bravo_internal_subnet   = "192.168.250.0/24"
+alfa_my_neighbour_ip    = "198.51.100.14"
+bravo_my_neighbour_ip   = "198.17.51.230"
+alfa_provider_asn       = 65101
+bravo_provider_asn      = 64600
+my_pa_asn               = 64859
+nodes_count_alfa        = 1
+nodes_count_bravo       = 1
