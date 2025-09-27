@@ -10,7 +10,7 @@ data "openstack_networking_network_v2" "external_net" {
 }
 
 # Сеть
-resource "openstack_networking_network_v2" "cloud_net_1" {
+resource "openstack_networking_network_v2" "this" {
   name                  = var.network_name
   region                = var.region_name
   admin_state_up        = "true"
@@ -18,10 +18,10 @@ resource "openstack_networking_network_v2" "cloud_net_1" {
 }
 
 # Подсеть
-resource "openstack_networking_subnet_v2" "private_subnet_1" {
-  name            = "${openstack_networking_network_v2.cloud_net_1.name}-subnet-1"
+resource "openstack_networking_subnet_v2" "this" {
+  name            = "${openstack_networking_network_v2.this.name}-subnet-1"
   region          = var.region_name
-  network_id      = openstack_networking_network_v2.cloud_net_1.id
+  network_id      = openstack_networking_network_v2.this.id
   cidr            = var.subnet_cidr
   dns_nameservers = var.dns_nameservers
   enable_dhcp     = "false"
@@ -34,27 +34,27 @@ resource "openstack_networking_subnet_v2" "private_subnet_1" {
 }
 
 # Роутер для сети
-resource "openstack_networking_port_v2" "router_port_1" {
+resource "openstack_networking_port_v2" "this" {
   region     = var.region_name
-  network_id = openstack_networking_network_v2.cloud_net_1.id
+  network_id = openstack_networking_network_v2.this.id
 
   fixed_ip {
-    subnet_id  = openstack_networking_subnet_v2.private_subnet_1.id
+    subnet_id  = openstack_networking_subnet_v2.this.id
     ip_address = cidrhost(var.subnet_cidr, 1)
   }
 
 }
 
-resource "openstack_networking_router_v2" "router_1" {
-  name                = "${openstack_networking_network_v2.cloud_net_1.name}-main-rtr"
+resource "openstack_networking_router_v2" "this" {
+  name                = "${openstack_networking_network_v2.this.name}-main-rtr"
   region              = var.region_name
   admin_state_up      = true
   external_network_id = data.openstack_networking_network_v2.external_net.id
 }
 
 # Внутренний порт для роутера
-resource "openstack_networking_router_interface_v2" "router_iface_1" {
+resource "openstack_networking_router_interface_v2" "this" {
   region    = var.region_name
-  router_id = openstack_networking_router_v2.router_1.id
-  port_id   = openstack_networking_port_v2.router_port_1.id
+  router_id = openstack_networking_router_v2.this.id
+  port_id   = openstack_networking_port_v2.this.id
 }

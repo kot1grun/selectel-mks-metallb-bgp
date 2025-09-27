@@ -5,6 +5,7 @@ common_rpm_packages:
   - bash-completion
   - python3-dnf
 frr_stable_rpm_repo_url: "https://rpm.frrouting.org/repo/frr-stable-repo.el9.noarch.rpm"
+my_timezone: Europe/Moscow
 trusted_ips:
   - 198.51.100.144/28
   - 203.0.113.96/27

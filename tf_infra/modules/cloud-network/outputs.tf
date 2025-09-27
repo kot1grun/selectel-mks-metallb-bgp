@@ -1,11 +1,11 @@
 output "network_id" {
-  value = openstack_networking_network_v2.cloud_net_1.id
+  value = openstack_networking_network_v2.this.id
 }
 
 output "subnet_id" {
-  value = openstack_networking_subnet_v2.private_subnet_1.id
+  value = openstack_networking_subnet_v2.this.id
 }
 
 output "subnet_cidr" {
-  value = openstack_networking_subnet_v2.private_subnet_1.cidr
+  value = openstack_networking_subnet_v2.this.cidr
 }

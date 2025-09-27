@@ -1,8 +1,8 @@
 output "srv_name" {
-  value = openstack_compute_instance_v2.server_1.name
+  value = openstack_compute_instance_v2.this.name
 }
 output "srv_id" {
-  value = openstack_compute_instance_v2.server_1.id
+  value = openstack_compute_instance_v2.this.id
 }
 
 output "srv_int_net_port_id" {

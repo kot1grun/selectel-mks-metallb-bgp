@@ -3,19 +3,19 @@ locals {
 }
 
 # Образ ОС (получение идентификатора)
-data "openstack_images_image_v2" "srv_os_lts" {
+data "openstack_images_image_v2" "this" {
   region      = local.region_name
   name        = var.srv_os_image
   most_recent = true
 }
 
 # Диск для ВМ
-resource "openstack_blockstorage_volume_v3" "srv_volume_1" {
+resource "openstack_blockstorage_volume_v3" "this" {
   name              = "volume-for-${var.srv_name}-1"
   region            = local.region_name
   availability_zone = var.availability_zone
   size              = var.srv_disk_size_gigabytes
-  image_id          = data.openstack_images_image_v2.srv_os_lts.id
+  image_id          = data.openstack_images_image_v2.this.id
   volume_type       = "${var.srv_disk_type}.${var.availability_zone}"
 
   lifecycle {
@@ -52,7 +52,7 @@ resource "openstack_networking_port_v2" "srv_int_net_port" {
 }
 
 # ВМ
-resource "openstack_compute_instance_v2" "server_1" {
+resource "openstack_compute_instance_v2" "this" {
   name              = var.srv_name
   region            = local.region_name
   availability_zone = var.availability_zone
@@ -68,7 +68,7 @@ resource "openstack_compute_instance_v2" "server_1" {
   }
 
   block_device {
-    uuid             = openstack_blockstorage_volume_v3.srv_volume_1.id
+    uuid             = openstack_blockstorage_volume_v3.this.id
     source_type      = "volume"
     destination_type = "volume"
     boot_index       = 0

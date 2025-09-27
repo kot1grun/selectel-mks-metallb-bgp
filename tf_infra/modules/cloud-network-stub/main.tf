@@ -1,5 +1,5 @@
 # Сеть (без роутера)
-resource "openstack_networking_network_v2" "cloud_net_1" {
+resource "openstack_networking_network_v2" "this" {
   name                  = var.network_name
   region                = var.region_name
   admin_state_up        = "true"
@@ -7,10 +7,10 @@ resource "openstack_networking_network_v2" "cloud_net_1" {
 }
 
 # Подсеть
-resource "openstack_networking_subnet_v2" "cloud_subnet_1" {
-  name            = "${openstack_networking_network_v2.cloud_net_1.name}-subnet-1"
+resource "openstack_networking_subnet_v2" "this" {
+  name            = "${openstack_networking_network_v2.this.name}-subnet-1"
   region          = var.region_name
-  network_id      = openstack_networking_network_v2.cloud_net_1.id
+  network_id      = openstack_networking_network_v2.this.id
   cidr            = var.subnet_cidr
   gateway_ip      = cidrhost(var.subnet_cidr, 1)
   dns_nameservers = var.dns_nameservers

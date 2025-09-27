@@ -1,4 +1,4 @@
-resource "openstack_networking_port_v2" "port_1" {
+resource "openstack_networking_port_v2" "this" {
   name           = var.port_name
   region         = var.region_name
   network_id     = var.network_id
@@ -14,8 +14,8 @@ resource "openstack_networking_port_v2" "port_1" {
   }
 }
 
-resource "openstack_compute_interface_attach_v2" "port_attach_1" {
+resource "openstack_compute_interface_attach_v2" "this" {
   region      = var.region_name
-  port_id     = openstack_networking_port_v2.port_1.id
+  port_id     = openstack_networking_port_v2.this.id
   instance_id = var.srv_id
 }
