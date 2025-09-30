@@ -18,7 +18,7 @@
     name: nftables
     state: latest
 - name: Disable cloud-init for configuring network
-  lineinfile:
+  ansible.builtin.lineinfile:
     path: /etc/cloud/cloud.cfg.d/99_disable_network_config.cfg
     line: "network: {config: disabled}"
     state: present
@@ -74,6 +74,33 @@
     path: /etc/sysconfig/nftables.conf
     insertafter: '^#include "/etc/nftables/main.nft"'
     line: 'include "/etc/nftables/local_custom.nft"'
+- name: Get current control node external IP (first opinion)
+  ansible.builtin.uri:
+    url: https://api.ipify.org/
+    return_content: true
+  delegate_to: localhost
+  register: ip_request_one
+- name: Get current control node external IP (second opinion)
+  ansible.builtin.uri:
+    url: https://ifconfig.me/ip
+    return_content: true
+    http_agent: "curl/8.7.0"
+  delegate_to: localhost
+  register: ip_request_two
+- name: Set trusted IPs
+  ansible.builtin.set_fact:
+    all_trusted_ips: "{{ all_trusted_ips|union([ip_request_one.content|trim]|union([ip_request_two.content|trim])) }}"
+- name: Initiate intersection IP list
+  ansible.builtin.set_fact:
+    intersection_ips: []
+- name: Add IP to intersection list
+  ansible.builtin.set_fact:
+    intersection_ips: "{{ intersection_ips + [item[1]] }}"
+  loop: "{{ all_trusted_ips|permutations(2) }}"
+  when: item[0]|ansible.utils.network_in_network(item[1])
+- name: Set trusted IPs once again
+  ansible.builtin.set_fact:
+    all_trusted_ips: "{{ all_trusted_ips|difference(intersection_ips) }}"
 - name: Render nftables template and save config to a file
   ansible.builtin.template:
     backup: false
