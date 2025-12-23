@@ -12,11 +12,11 @@
 - name: Get current AAPs on OpenStack port
   ansible.builtin.set_fact:
     current_aaps: "{{ port_data.ports[0].allowed_address_pairs }}"
-- name: Create AAP dict step 1
-  set_fact:
+- name: Create AAP list (of dict)
+  ansible.builtin.set_fact:
     additional_aaps: []
-- name: Create AAP dict step 2
-  set_fact:
+- name: Append data to AAP list (of dict)
+  ansible.builtin.set_fact:
     additional_aaps: "{{ additional_aaps + [{ 'ip_address': item, 'mac_address': port_data.ports[0].mac_address }] }}"
   loop: "{{ allowed_subnets|split(',') }}"
 - name: Join (union) two AAPs

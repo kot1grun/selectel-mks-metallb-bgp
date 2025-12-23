@@ -19,7 +19,7 @@ router bgp {{ my_asn }}
  neighbor mks-nodes update-source {{ my_internal_iface }}
  neighbor {{ peer_ip_address }} remote-as {{ provider_asn }}
  neighbor {{ peer_ip_address }} description {{ provider }}-{{ region }}-peer
- neighbor {{ peer_ip_address }} interface eth0
+ neighbor {{ peer_ip_address }} interface {{ my_external_iface }}
  neighbor {{ peer_ip_address }} ebgp-multihop
  bgp listen limit 110
  bgp listen range {{ my_local_subnet }} peer-group mks-nodes
